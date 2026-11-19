@@ -686,6 +686,42 @@ html.beat-3 .sess.busy .st, html.beat-4 .sess.shell .st, html.beat-2 .sess.waiti
 .ib-h span { font-size: 10.5px; color: var(--dim); white-space: nowrap; }
 .ib-t { font-size: 11.5px; color: var(--muted); }
 
+/* ---------- compute units ---------- */
+.w-compute { padding: 9px 12px; display: flex; flex-direction: column; gap: 5px; --c: #38bdf8; }
+.cu-head { display: flex; align-items: baseline; gap: 8px; }
+.cu-head .w-title { flex: 1; min-width: 0; }
+.cu-head .w-sub { margin-left: 0; }
+.cu-rows { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between; gap: 5px; touch-action: pan-y; }
+.cu-empty { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 3px; color: var(--muted); font-size: 12px; }
+.cu-empty code { font: 10.5px "Roboto Mono", monospace; color: var(--dim); }
+.cu-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; background: rgba(255, 255, 255, .035); font-size: clamp(11.5px, 2.9cqh, 14px); }
+.cu-row.off { opacity: .45; }
+.cu-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, .55); }
+.cu-row.off .cu-dot { background: #64748b; box-shadow: none; }
+.cu-row.off .cu-bar { background: transparent; }
+.cu-name { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cu-name b { font-weight: 600; color: var(--text); }
+.cu-name small { color: var(--dim); font-weight: 400; }
+.cu-ping { flex: 0 0 46px; text-align: right; color: var(--muted); font-size: .92em; white-space: nowrap; }
+.cu-row.off .cu-ping { font-size: .8em; letter-spacing: .02em; }
+.cu-cell { flex: 0 0 64px; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.cu-ram { flex: 0 0 80px; }
+.cu-cell b { font-weight: 600; font-size: 1.18em; white-space: nowrap; }
+.cu-bar { display: block; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.cu-bar em { display: block; height: 100%; border-radius: 2px; background: var(--c, #38bdf8); }
+.cu-cpu { --c: #38bdf8; }
+.cu-ram { --c: #a78bfa; }
+.cu-cpu.warm, .cu-ram.warm { --c: #f59e0b; }
+.cu-cpu.hot, .cu-ram.hot { --c: #ef4444; }
+.cu-temp { flex: 0 0 36px; text-align: right; color: var(--muted); white-space: nowrap; }
+.cu-temp.hot { color: #f87171; font-weight: 600; }
+.cu-bat { flex: 0 0 46px; text-align: right; color: #4ade80; white-space: nowrap; font-weight: 600; }
+.cu-bat.low { color: #f87171; }
+.w-compute.compact .cu-ram, .w-compute.compact .cu-temp { display: none; }
+@container (max-width: 430px) { .cu-ping { display: none; } .cu-ram { flex-basis: 64px; } }
+@container (max-width: 340px) { .cu-ram, .cu-temp { display: none; } }
+@container (max-height: 170px) { .cu-row { padding: 3px 8px; } .cu-ram { display: none; } }
+
 /* ---------- analog clock ---------- */
 .w-analog { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .analog { width: min(100cqh, 100cqw); aspect-ratio: 1; flex: 0 1 auto; min-height: 0; }

@@ -50,3 +50,8 @@ tools/ui-tests/test-results/
 
 *.log
 *.txt
+# compute collector runtime (extras/lgv35-compute-push)
+extras/lgv35-compute-push/logs/
+extras/lgv35-compute-push/.pid
+extras/lgv35-compute-push/.ssh-*
+extras/lgv35-compute-push/nodes.json

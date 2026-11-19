@@ -1,0 +1,18 @@
+{
+  "interval": 5,
+  "ttl": 30,
+  "endpoints": [
+    "http://127.0.0.1:8765",
+    "https://192.168.100.200:8766"
+  ],
+  "token_file": "~/.config/phonebox-compute/token",
+  "nodes": [
+    { "id": "loq", "name": "Lenovo LOQ", "host": "192.168.100.200", "user": "roychong", "port": 22, "kind": "linux" },
+    { "id": "m64", "name": "Dell M6400", "host": "192.168.100.78", "user": "roychong", "port": 22, "kind": "linux" },
+    { "id": "d3180", "name": "Dell D3180", "host": "192.168.100.38", "user": "roychong", "port": 22, "kind": "linux" },
+    { "id": "gt20", "name": "GT20", "host": "192.168.100.242", "user": "u0_a325", "port": 8022, "kind": "android" },
+    { "id": "lgv35", "name": "LG V35", "local": true, "kind": "android" },
+    { "id": "mate10", "name": "Mate10", "host": "100.75.77.74", "user": "u0_a206", "port": 8022, "kind": "android", "enabled": false },
+    { "id": "h5x", "name": "Honor 5X", "host": "192.168.100.28", "user": "u0_a109", "port": 8022, "kind": "android", "enabled": false }
+  ]
+}
