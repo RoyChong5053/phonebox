@@ -14,6 +14,8 @@ import { W } from '../registry.js';
 
 const pctOf = (v) => (v == null || !Number.isFinite(+v) ? null : Math.max(0, Math.min(100, +v)));
 const level = (p) => (p == null ? '' : p >= 90 ? ' hot' : p >= 70 ? ' warm' : '');
+// The machine a node is about: a computer (💻) or the panel's own phone (📱); a field that is null is "not this".
+const devIcon = (n) => (n && (n.local || n.kind === 'android')) ? '📱' : '💻';
 
 function battery(n) {
   let pct = n.bat, chg = n.bat_state === 'Charging' || n.bat_state === 'Full' || n.ac === true;
@@ -46,7 +48,10 @@ W.compute = {
     const title = h('div', 'w-title', o.title ? o.title : en('Compute units'));
     const meta = h('span', 'w-sub');
     const rows = h('div', 'cu-rows');
-    box.append(h('div', 'cu-head', title, meta), rows);
+    // the device glyph of the instance: it follows the machine the first row shows (computer 💻, phone 📱)
+    const devIco = h('span', 'cu-ico', '💻');
+    const head = h('div', 'cu-head', devIco, title, meta);
+    box.append(head, rows);
     if (compact) box.classList.add('compact');
     let lastAt = null, lastNodes = '';
 
@@ -59,6 +64,7 @@ W.compute = {
       const bat = battery(n);
       const el = h('div', 'cu-row' + (n.online ? '' : ' off'),
         h('span', 'cu-dot'),
+        h('span', 'cu-ico', devIcon(n)),
         h('span', 'cu-name', h('b', null, n.name || n.id || '?'),
           n.cores ? h('small', null, ' ' + n.cores + 'c') : null),
         h('span', 'cu-ping', n.online ? (n.ping == null ? '' : Math.round(n.ping) + 'ms') : 'offline'),
@@ -88,6 +94,7 @@ W.compute = {
       const sig = JSON.stringify(nodes) + box.clientHeight;
       if (at === lastAt && sig === lastNodes) return;
       lastAt = at; lastNodes = sig;
+      if (devIco && nodes[0]) devIco.textContent = devIcon(nodes[0]);
       rows.replaceChildren(...nodes.map(row));
     };
 

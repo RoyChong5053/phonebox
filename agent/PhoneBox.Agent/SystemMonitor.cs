@@ -23,7 +23,7 @@ public sealed record DiskInfo(string Name, double UsedGb, double TotalGb);
 
 public sealed record PcSnapshot(double? Cpu, double? CpuTemp, string CpuName, double RamUsedGb, double RamTotalGb,
     GpuInfo? Gpu, double NetDownBps, double NetUpBps, IReadOnlyList<DiskInfo> Disks, long UptimeSec,
-    IReadOnlyList<GpuInfo>? Gpus = null);
+    IReadOnlyList<GpuInfo>? Gpus = null, IReadOnlyList<DiskIoInfo>? DiskIo = null, TmpInfo? Tmp = null);
 
 /// <summary>Samples CPU, RAM, network, disk and GPU metrics once a second.</summary>
 public sealed partial class SystemMonitor(ILogger<SystemMonitor> log, ConfigStore? config = null) : BackgroundService
@@ -44,6 +44,7 @@ public sealed partial class SystemMonitor(ILogger<SystemMonitor> log, ConfigStor
     {
         _ = Task.Run(() => GpuLoop(ct), ct);
         _ = Task.Run(() => CpuTempLoop(ct), ct);
+        _ = Task.Run(() => TmpLoop(ct), ct);
 
         var (idle0, total0) = CpuTimes();
         var net0 = NetBytes(Chosen());
@@ -66,6 +67,7 @@ public sealed partial class SystemMonitor(ILogger<SystemMonitor> log, ConfigStor
             (net0, t0) = (net1, t1);
 
             if (tick++ % 15 == 0) _disks = ReadDisks();
+            _diskIo = SampleDiskIo();
 
             var (memUsed, memTotal) = Memory();
             const double Gb = 1024d * 1024 * 1024;
@@ -82,7 +84,9 @@ public sealed partial class SystemMonitor(ILogger<SystemMonitor> log, ConfigStor
                 NetUpBps: Math.Round(up),
                 Disks: _disks,
                 UptimeSec: Environment.TickCount64 / 1000,
-                Gpus: gpus);
+                Gpus: gpus,
+                DiskIo: _diskIo,
+                Tmp: _tmp);
         }
     }
 

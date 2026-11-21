@@ -43,10 +43,11 @@ import androidx.webkit.WebViewFeature
 import org.json.JSONObject
 
 /**
- * Full-screen desk panel. The UI is plain HTML/JS bundled in assets/www.
- * The UI calls "/agent/..." URLs; they are intercepted here and forwarded to the PhoneBox agent on the PC,
- * over USB (adb reverse) or, once paired, over Wi-Fi / Tailscale (see AgentLink). The WebView itself therefore
- * never makes local-network requests (no CORS, mixed-content or local-network-access issues).
+ * Full-screen desk panel. The UI is plain HTML/JS served by the PhoneBox agent itself: the document, its scripts,
+ * styles and widget modules ride the "/agent/..." proxy like the API data does, over USB (adb reverse) or, once
+ * paired, over Wi-Fi / Tailscale (see AgentLink). The WebView therefore never makes local-network requests (no
+ * CORS, mixed-content or local-network-access issues), and a new agent build is enough to put a new widget in front
+ * of the phone - no new APK needed.
  */
 class MainActivity : Activity(), SensorEventListener {
 
@@ -121,7 +122,10 @@ class MainActivity : Activity(), SensorEventListener {
         // Lets you debug the panel from the computer via chrome://inspect.
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
-        web.loadUrl("https://$ASSET_HOST/assets/www/index.html")
+        // The panel UI itself is loaded through the same /agent/* proxy as the API: the agent serves the document,
+        // its scripts, styles and widget modules from the same embedded www/ the data comes from, so a new widget
+        // only needs a new agent build, not a new APK.
+        web.loadUrl("https://$ASSET_HOST/agent/panel/index.html")
         hideSystemUi()
         handlePairingLink(intent)
     }
@@ -174,9 +178,14 @@ class MainActivity : Activity(), SensorEventListener {
      * X-PhoneBox-Panel on its requests; a sandboxed frame cannot add it without a CORS preflight, which is refused.
      * Images (album art, process icons) cannot carry headers, but they are read-only GETs.
      */
-    private fun fromPanel(req: WebResourceRequest): Boolean =
-        req.requestHeaders.keys.any { it.equals(PANEL_HEADER, ignoreCase = true) } ||
-            (req.method == "GET" && req.url.path in READ_ONLY_IMAGES)
+    private fun fromPanel(req: WebResourceRequest): Boolean {
+        // The panel UI is same-origin for the document and its own frames, so its scripts, styles and widget
+        // modules may load without the panel header (that is only for frames that are not the panel's own, like a
+        // sandboxed widget iframe). The paths under the proxy's /panel/ prefix are exactly that UI.
+        val path = req.url.encodedPath
+        if (req.method == "GET" && path != null && (path in READ_ONLY_IMAGES || path.removePrefix("/agent").startsWith("/panel"))) return true;
+        return req.requestHeaders.keys.any { it.equals(PANEL_HEADER, ignoreCase = true) };
+    }
 
     private fun proxy(req: WebResourceRequest): WebResourceResponse {
         val path = req.url.encodedPath!!.removePrefix("/agent")

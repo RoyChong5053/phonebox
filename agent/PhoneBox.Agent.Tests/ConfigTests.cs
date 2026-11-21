@@ -333,7 +333,9 @@ public class LanTests
     [InlineData("/api/ha/test", false)]
     [InlineData("/api/phones", false)]
     [InlineData("/api/rules/test", false)]
-    [InlineData("/panel/main.js", false)]
+    // the panel UI itself (the phone loads its document, scripts, styles and widget modules through the proxy)
+    [InlineData("/panel/main.js", true)]
+    [InlineData("/panel/widgets/storage.js", true)]
     [InlineData("/", false)]
     public void OnlyThePhoneApiIsReachableOverWifi(string path, bool allowed) => Assert.Equal(allowed, Lan.AllowedOverLan(new PathString(path)));
 

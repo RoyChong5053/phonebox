@@ -190,6 +190,16 @@
         ramUsedGb: wave(120, 21, 24), ramTotalGb: 64, netDownBps: Math.max(0, wave(23, 0.2e6, 9e6, 0, 1e6)), netUpBps: Math.max(0, wave(17, 40e3, 600e3, 1, 50e3)),
         uptimeSec: 3 * 86400 + 5 * 3600 + Math.floor((now() - START) / 1000),
         disks: [{ name: 'C:', usedGb: 612, totalGb: 1000 }, { name: 'D:', usedGb: 1450, totalGb: 2000 }, { name: 'E:', usedGb: 310, totalGb: 4000 }],
+        diskIo: [
+          { name: 'nvme0n1', readBps: Math.max(0, wave(31, 0.2e6, 48e6, 0, 2e6)), writeBps: Math.max(0, wave(19, 0.1e6, 22e6, 1, 1e6)), busyPct: wave(43, 3, 62), iops: wave(47, 40, 2400) },
+          { name: 'sda', readBps: Math.max(0, wave(12, 0, 6e6, 3, 0.4e6)), writeBps: Math.max(0, wave(23, 0.1e6, 9e6, 2, 0.5e6)), busyPct: wave(61, 1, 28), iops: wave(29, 20, 700) },
+        ],
+        tmp: { path: '/tmp', fs: 'tmpfs', usedMb: wave(1.1e5, 420, 3200, 2, 120), totalMb: 14336, entries: 77, oldestSec: 5 * 86400 + 2 * 3600,
+          top: [
+            { name: 'Qwen3.5-0.8B-UD-Q4_K_XL.gguf', sizeMb: 533, ageSec: 3 * 3600, protected: false },
+            { name: 'puppeteer_dev_chrome_profile-WJ9TR1', sizeMb: 102, ageSec: 86400, protected: false },
+            { name: 'opencode', sizeMb: 1.1, ageSec: 240, protected: true },
+          ] },
         ...(() => {
           const gpus = [
             { name: 'NVIDIA GeForce RTX 4080', util: Math.max(0, wave(29, 4, 38, 2, 4)), temp: wave(50, 46, 61), power: wave(29, 38, 140, 2),

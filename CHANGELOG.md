@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+**Widgets**
+- New Disk I/O widget: read and write throughput of the physical SSDs with a live chart and the busy share of each
+  device, taken from `/proc/diskstats`.
+- New Temp folder widget: used and total of the temp folder (`/tmp` by default, `TMPDIR` when it is set), the oldest
+  entries, and a clean button that deletes what old runs left behind (sockets and live directories are kept).
+- Compute units: the machines it watches are marked with their glyph (computer 💻, phone 📱) in the widget title and
+  on every row, so a PC and a phone are told apart at a glance; several widgets can watch different machines, each
+  with its own push key.
+
 ## 0.9.24 — 2026-11-20
 
 A security fix for phones connected over USB: the USB connection now answers only the PhoneBox app, so **update the

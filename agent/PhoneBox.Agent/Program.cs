@@ -643,6 +643,18 @@ app.MapPost("/api/rules/pause", (int? minutes, RuleEngine rules) =>
 
 app.MapGet("/api/state", (long? ev, HttpContext ctx) => Results.Json(State(ctx.RequestServices, ev)));
 
+// Temp folder (Temp widget): the snapshot rides on /api/state; this is the refresh after a clean and the dry run
+// the phone shows before it deletes anything. Only entries older than minAge go, never the protected ones.
+app.MapGet("/api/tmp", () => Results.Json(SystemMonitor.ScanTmp(SystemMonitor.TmpPath())));
+app.MapPost("/api/tmp/clean", (string? minAge, string? dry) =>
+{
+    // The panel sends the dry run as "1" (a checkbox state), which the bool binder refuses, so both spellings parse.
+    var minutes = int.TryParse(minAge, out var m) ? m : 60;
+    var run = int.TryParse(dry, out var d) && d != 0;
+    var age = TimeSpan.FromMinutes(Math.Clamp(minutes, 1, 7 * 24 * 60));
+    return Results.Json(SystemMonitor.CleanTmp(SystemMonitor.TmpPath(), age, run));
+});
+
 // Live stream (server-sent events) for the phone: "state" every second, "event" as soon as one happens, "work" when it
 // changes. The Android shell keeps one connection open instead of polling; the panel falls back to polling without it.
 // One "state" frame for all open streams: they wake on the same second (below), so the state is built and serialized once
@@ -899,8 +911,14 @@ app.MapDelete("/api/settings/shortcut-icon", (string id, HttpRequest req, Config
 });
 
 app.Lifetime.ApplicationStarted.Register(() =>
+{
     app.Logger.LogInformation("PhoneBox agent {Version} ready on http://127.0.0.1:{Port}, phone USB port {UsbPort} (config: {Path})",
-        AppPaths.Version, Port, usb.Port, configPath));
+        AppPaths.Version, Port, usb.Port, configPath);
+    // The panel UI is served by the agent (the phone loads its document and widgets through the /agent/ proxy), so
+    // a new build of the agent is what puts new widget modules in front of the phones: ask them to reload their panel.
+    var push = app.Services.GetRequiredService<PushStore>();
+    push.Emit("reload");
+});
 
 app.Run();
 

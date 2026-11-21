@@ -398,6 +398,27 @@ body.offline .offline-msg { display: flex; }
 .track i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--c, var(--cpu)); transition: width .6s ease; }
 .disks { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; }
 
+/* ---------- disk I/O & temp folder ---------- */
+.w-diskiostat, .w-tmpdir { padding: 9px 12px 10px; display: flex; flex-direction: column; }
+.io-body { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.io-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+.io-name { font-size: 11.5px; color: #d5dce5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.io-rate { font-size: 11.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.io-rate b { font-weight: 600; color: #94a3b8; }
+.io-busy { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; }
+.io-track { flex: 1; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.io-track i { display: block; height: 100%; width: 0; border-radius: 2px; background: var(--c, #38bdf8); transition: width .5s ease; }
+.io-busy em { font-style: normal; font-size: 10px; color: var(--muted); min-width: 28px; text-align: right; }
+.io-chart { flex: 1; width: calc(100% + 24px); margin: 4px -12px 0; min-height: 22px; }
+.tmp-meta { display: flex; gap: 10px; font-size: 11px; color: var(--muted); margin-top: 5px; }
+.tmp-top { flex: 1; min-height: 0; overflow: hidden; margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+.tmp-e { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; }
+.tmp-en { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #cdd5df; }
+.tmp-es { color: var(--muted); white-space: nowrap; }
+.tmp-e.keep .tmp-en { opacity: .55; }
+.tmp-clean { margin-top: 6px; border: 0; border-radius: 10px; padding: 8px; font: inherit; font-size: 12px; font-weight: 600; color: #0b1220; background: var(--c, #94a3b8); cursor: pointer; }
+.tmp-clean:disabled { opacity: .45; cursor: default; }
+
 /* ---------- AI quotas ---------- */
 .w-quotas { background: none; border: 0; }
 .q-grid { height: 100%; display: flex; gap: 10px; }
@@ -688,9 +709,10 @@ html.beat-3 .sess.busy .st, html.beat-4 .sess.shell .st, html.beat-2 .sess.waiti
 
 /* ---------- compute units ---------- */
 .w-compute { padding: 9px 12px; display: flex; flex-direction: column; gap: 5px; --c: #38bdf8; }
-.cu-head { display: flex; align-items: baseline; gap: 8px; }
+.cu-head { display: flex; align-items: center; gap: 8px; }
 .cu-head .w-title { flex: 1; min-width: 0; }
 .cu-head .w-sub { margin-left: 0; }
+.cu-ico { flex: 0 0 auto; width: 14px; text-align: center; font-size: 12px; line-height: 1; }
 .cu-rows { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between; gap: 5px; touch-action: pan-y; }
 .cu-empty { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 3px; color: var(--muted); font-size: 12px; }
 .cu-empty code { font: 10.5px "Roboto Mono", monospace; color: var(--dim); }
