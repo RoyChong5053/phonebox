@@ -214,7 +214,7 @@ b47da3d09583268d7bacef2d4375555313bf455af8a3ab16fd4d7ee95082826e  PhoneBoxAgent-
             }
 
             var cfgPath = Path.Combine(dir, "config.json");
-            File.WriteAllText(cfgPath, JsonSerializer.Serialize(new { adbPath = fakeAdb, updates = new { auto = false } }));
+            File.WriteAllText(cfgPath, JsonSerializer.Serialize(new { adbPath = fakeAdb, updates = new { auto = false, repo = "test/phonebox" } }));
             var cfg = new ConfigStore(cfgPath);
             var adb = new AdbReverse(cfg, NullLogger<AdbReverse>.Instance);
             var devicesField = typeof(AdbReverse).GetField("_devices", BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -281,6 +281,36 @@ b47da3d09583268d7bacef2d4375555313bf455af8a3ab16fd4d7ee95082826e  PhoneBoxAgent-
             UpdateService.AppVersion = prevAppVer;
             try { Directory.Delete(dir, true); } catch { }
         }
+    }
+
+    [Fact]
+    public async Task EmptyRepoMakesNoUpdateRequest()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "pb-upd-empty-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var cfgPath = Path.Combine(dir, "config.json");
+            File.WriteAllText(cfgPath, JsonSerializer.Serialize(new { updates = new { auto = false, repo = "" } }));
+            var cfg = new ConfigStore(cfgPath);
+            var adb = new AdbReverse(cfg, NullLogger<AdbReverse>.Instance);
+            var svc = new UpdateService(cfg, adb, new NoopLifetime(), NullLogger<UpdateService>.Instance) { DownloadsDir = Path.Combine(dir, "dl") };
+            var httpField = typeof(UpdateService).GetField("_http", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            httpField.SetValue(svc, new HttpClient(new NoRequestsHandler()));
+
+            await svc.CheckAsync();
+
+            Assert.Null(svc.Status().Error);
+            Assert.False(svc.Status().AppUpdate);
+            Assert.False(svc.Status().AgentUpdate);
+        }
+        finally { try { Directory.Delete(dir, true); } catch { } }
+    }
+
+    private sealed class NoRequestsHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
+            throw new InvalidOperationException("a self-hosted build must not call GitHub: " + request.RequestUri);
     }
 
     private sealed class FakeReleaseHandler(string relJson, byte[] apk, string sums, Action? onApk = null) : HttpMessageHandler
