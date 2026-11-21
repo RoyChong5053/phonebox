@@ -195,7 +195,28 @@ class MainActivity : Activity(), SensorEventListener {
         val mime = ct.substringBefore(';').trim()
         val charset = if (ct.contains("charset=")) ct.substringAfter("charset=").trim() else null
         val status = if (r.code in 100..599 && r.code !in 300..399) r.code else 502
+        // The panel document is the whole screen: while the agent is unreachable (a restart, USB not ready yet,
+        // the computer asleep) show a self-retrying "PC not connected" page instead of the raw {"error":"offline"}
+        // JSON the proxy answers for everything else.
+        if (status >= 500 && path == "/panel/index.html") {
+            try { r.body.close() } catch (_: Exception) {}
+            return offlineDocument()
+        }
         return WebResourceResponse(mime, charset, status, if (status < 400) "OK" else "Error", NO_STORE, r.body)
+    }
+
+    /** Stands in for the panel document until the agent answers again; reloads itself so the panel recovers alone. */
+    private fun offlineDocument(): WebResourceResponse {
+        val html = """<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>html,body{height:100%;margin:0;background:#000;color:#9aa4b2;font:500 28px/1.4 system-ui,sans-serif}
+body{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center}
+.dot{width:14px;height:14px;border-radius:50%;background:#2dd4bf;animation:p 1.2s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:.25}50%{opacity:1}}</style></head>
+<body><div class="dot"></div><div>PC not connected</div>
+<script>setTimeout(function(){location.reload()},3000)</script></body></html>"""
+        return WebResourceResponse("text/html", "utf-8", 200, "OK", NO_STORE,
+            java.io.ByteArrayInputStream(html.toByteArray(Charsets.UTF_8)))
     }
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)

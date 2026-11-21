@@ -111,6 +111,8 @@ public sealed class UpdateService(ConfigStore cfg, AdbReverse adb, IHostApplicat
         {
             _state = "checking";
             var repo = cfg.Get().Updates.Repo;
+            // A self-hosted build leaves the channel empty: no GitHub call, no upstream code can arrive.
+            if (string.IsNullOrWhiteSpace(repo)) { _latest = null; _error = null; _state = "idle"; return; }
             using var doc = JsonDocument.Parse(await ApiStringAsync($"https://api.github.com/repos/{repo}/releases/latest", ct));
             var r = doc.RootElement;
             foreach (var a in r.GetProperty("assets").EnumerateArray())

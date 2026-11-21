@@ -55,3 +55,6 @@ extras/lgv35-compute-push/logs/
 extras/lgv35-compute-push/.pid
 extras/lgv35-compute-push/.ssh-*
 extras/lgv35-compute-push/nodes.json
+
+# self-hosted build output
+/dist-selfhost/

@@ -213,9 +213,12 @@ public sealed class LanConfig
 
 public sealed class UpdateConfig
 {
-    /// <summary>Install new GitHub releases automatically (phone app over USB, agent in place).</summary>
-    public bool Auto { get; set; } = true;
-    public string Repo { get; set; } = "ersinkoc/phonebox";
+    /// <summary>Install new GitHub releases automatically (phone app over USB, agent in place). Off in this
+    /// self-hosted build: updates are built and applied by the owner, never pulled from upstream.</summary>
+    public bool Auto { get; set; }
+    /// <summary>This build's own release channel. Empty = no update check at all: this is a self-hosted build whose
+    /// owner builds and applies updates by hand. Set it only to a repository the owner controls and signs.</summary>
+    public string Repo { get; set; } = "";
 }
 
 public sealed class ClaudeConfig
@@ -565,7 +568,6 @@ public sealed partial class ConfigStore(string path)
         c.Claude ??= new();
         c.Claude.TimeoutSec = Math.Clamp(c.Claude.TimeoutSec, 10, 3600);
         c.Cursor ??= new();
-        if (string.IsNullOrWhiteSpace(c.Updates.Repo)) c.Updates.Repo = "ersinkoc/phonebox";
         c.Lan.Port = Math.Clamp(c.Lan.Port, 1024, 65535);
         if (string.IsNullOrWhiteSpace(c.Lan.Token)) c.Lan.Token = NewToken();
         if (string.IsNullOrWhiteSpace(c.Lan.WebhookToken)) c.Lan.WebhookToken = NewToken();
